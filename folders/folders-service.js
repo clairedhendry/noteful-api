@@ -5,21 +5,35 @@ const FoldersService = {
             .from('noteful_folders')
     },
 
-    getFolderById() {
-        console.log('folder retrieved')
+    getFolderById(knex, id) {
+        return knex
+            .from('noteful_folders')
+            .select('*')
+            .where('id', id)
+            .first()
     },
 
-    postFolder() {
-        console.log('new folder created')
+    postFolder(knex, newFolder) {
+        return knex 
+            .insert(newFolder)
+            .into('noteful_folders')
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
     },
 
-    updateFolder() {
-        console.log('folder updated')
+    updateFolder(knex, id, newFolderData) {
+        return knex('noteful_folders')
+            .where({id})
+            .update(newFolderData)
     },
 
-    deleteFolder() {
-        console.log('folder deleted')
-    }
+    deleteFolder(knex, id) {
+        return knex('noteful_folders')
+            .where({id})
+            .delete()
+    },
 }
 
 module.exports = FoldersService

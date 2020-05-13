@@ -10,7 +10,85 @@ FoldersRouter
     .route('/')
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
-        FoldersService.getAllFolders()
+        FoldersService.getAllFolders(knexInstance)
+            .then(folders => {
+                res.json(folders)
+            })
+                .catch(next)
+    })
+    .post(jsonParser, (req, res, next) => {
+        const {name} = req.body
+        const newFolder = {name}
+
+        if(!name) {
+            return res.status(400).json({
+                error: {message: `Missing 'name' in request body`}
+            })
+        }
+
+        FoldersService.postFolder(
+            req.app.get('db'),
+            newFolder
+        )
+        .then(folder => {
+            res
+                .status(201)
+                .location(path.posix.join(req.originalUrl, `/${folder.id}`))
+                .json(folder)
+        })
+        .catch(next)
+    })
+
+FoldersRouter
+    .route('/:folder_id')
+    .all((req, res, next) => {
+        FoldersService.getFolderById(
+            req.app.get('db'),
+            req.params.folder_id
+        )
+        .then(folder => {
+            if(!folder) {
+                return res.status(404).json({
+                    error: {message: `Folder doesn't exist`}
+                })
+            }
+            res.folder = folder
+            next()
+        })
+        .catch(next)
+    })
+    .get((req, res, next) => {
+        res.json(res.folder)
+    })
+    .delete((req, res, next) => {
+        FoldersService.deleteFolder(
+            req.app.get('db'),
+            req.params.folder_id
+        )
+        .then(() => {
+            res.status(204).end()
+        })
+        .catch(next)
+    })
+    .patch(jsonParser, (req, res, next) => {
+        const {name} = req.body
+        const newFolder = {name}
+
+        if(!name) {
+            return res.status(400).json({
+                error: {message: `Rerquest body must contain 'name'`}
+            })
+        }
+
+        FoldersService.updateFolder(
+            req.app.get('db'),
+            req.params.folder_id,
+            newFolder
+        )
+        .then(numRowsAffected => {
+            res.status(204).end()
+        })
+        .catch(next)
     })
 
 

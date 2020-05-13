@@ -1,4 +1,6 @@
-INSERT INTO noteful_notes (folder_id, name, content, date_created)
+TRUNCATE TABLE noteful_notes;
+
+INSERT INTO noteful_notes (folder_id, name, content, date_modified)
 VALUES
 (1, 'Dogs', 'Dogs are pretty great!', '2019-01-03T00:00:00.000Z'),
 (2, 'Cats', 'Cats are even better!', '2018-08-15T23:00:00.000Z'),
